@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Grammar Galaxy 🌟 - Powered by Shree Parth Academy</title>
+    
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    
+    <!-- Page-specific CSS -->
+    <style>
+        /* App container */
+        #app {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: var(--bg);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(108,99,255,0.05);
+        }
+
+        /* Page container - loads pages via iframe or fetch */
+        .page-container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .page-container iframe {
+            width: 100%;
+            min-height: 100vh;
+            border: none;
+            background: var(--bg);
+        }
+
+        /* Splash screen (in main file) */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2E 50%, #0A1A2E 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        #splash-screen.hidden { opacity: 0; transform: scale(1.1); pointer-events: none; }
+
+        #splash-screen::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 50px 160px, #ddd, transparent),
+                radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 130px 80px, #fff, transparent),
+                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.7), transparent);
+            background-size: 200px 200px;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .splash-content { text-align: center; animation: float 3s ease-in-out infinite; z-index: 1; position: relative; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+        .splash-logo {
+            width: 140px; height: 140px;
+            background: radial-gradient(circle at 30% 30%, rgba(108,99,255,0.3), rgba(108,99,255,0.1));
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 64px; margin: 0 auto 32px;
+            border: 2px solid rgba(108,99,255,0.3);
+            box-shadow: var(--glow-primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .splash-title { color: white; font-size: 40px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; text-shadow: 0 0 40px rgba(108,99,255,0.3); }
+        .splash-title .globe { display: inline-block; animation: spin 4s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .splash-title .star { color: var(--gold); }
+
+        .splash-subtitle { color: rgba(255,255,255,0.8); font-size: 18px; font-weight: 300; }
+        .splash-powered { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 4px; font-weight: 300; }
+        .splash-powered strong { color: rgba(255,255,255,0.8); font-weight: 600; }
+
+        .splash-badge {
+            display: inline-block;
+            background: rgba(255,215,0,0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 24px;
+            border-radius: var(--radius-full);
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 12px;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+
+        .splash-loader {
+            margin-top: 48px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            z-index: 1;
+            position: relative;
+        }
+        .splash-loader span {
+            display: inline-block;
+            width: 12px; height: 12px;
+            background: rgba(108,99,255,0.4);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+            border: 1px solid rgba(108,99,255,0.3);
+        }
+        .splash-loader span:nth-child(2) { animation-delay: 0.2s; background: rgba(108,99,255,0.6); }
+        .splash-loader span:nth-child(3) { animation-delay: 0.4s; background: rgba(108,99,255,0.8); }
+        @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+        .splash-footer { position: absolute; bottom: 40px; color: rgba(255,255,255,0.2); font-size: 12px; z-index: 1; }
+
+        /* Toast notification (global) */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            z-index: 400;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            max-width: 90%;
+            text-align: center;
+            border: 1px solid rgba(108,99,255,0.1);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.error { border-color: var(--danger); color: var(--danger); }
+        .toast.info { border-color: var(--primary); color: var(--primary); }
+        .toast.gold { border-color: var(--gold); color: var(--gold); }
+
+        /* Modal (global) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 32px 24px 24px 24px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            animation: modalSlideUp 0.4s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(108,99,255,0.1);
+        }
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal .modal-icon { font-size: 56px; margin-bottom: 12px; display: block; }
+        .modal h3 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: var(--text-primary); }
+        .modal p { color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6; font-size: 15px; }
+        .modal .modal-actions { display: flex; gap: 12px; }
+        .modal .modal-actions .btn { flex: 1; }
+
+        .modal .modal-score {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 12px 0 16px 0;
+        }
+        .modal .modal-score .score-item { text-align: center; }
+        .modal .modal-score .score-item .score-number {
+            font-size: 28px; font-weight: 700; color: var(--gold);
+        }
+        .modal .modal-score .score-item .score-label {
+            font-size: 11px; color: var(--text-muted);
+        }
+
+        /* Confetti container */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 500;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall 3s ease-in-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 430px) {
+            .splash-title { font-size: 32px; }
+            .splash-logo { width: 110px; height: 110px; font-size: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- Splash Screen -->
+        <div id="splash-screen">
+            <div class="splash-content">
+                <div class="splash-logo">🌍</div>
+                <h1 class="splash-title">Grammar <span class="globe">🌍</span> Galaxy <span class="star">⭐</span></h1>
+                <p class="splash-subtitle">Complete English Grammar Learning</p>
+                <p class="splash-powered">Powered by <strong>Shree Parth Academy</strong></p>
+                <span class="splash-badge">🎯 Maharashtra Board 8th-10th</span>
+                <div class="splash-loader"><span></span><span></span><span></span></div>
+            </div>
+            <div class="splash-footer">📚 Learn • Practice • Master</div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast"></div>
+
+        <!-- Confetti -->
+        <div class="confetti-container" id="confetti-container"></div>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modal">
+            <div class="modal">
+                <span class="modal-icon" id="modal-icon">🎉</span>
+                <h3 id="modal-title">Quiz Complete!</h3>
+                <div class="modal-score">
+                    <div class="score-item"><div class="score-number" id="modal-score-number">0</div><div class="score-label">Score</div></div>
+                    <div class="score-item"><div class="score-number" id="modal-accuracy">0%</div><div class="score-label">Accuracy</div></div>
+                    <div class="score-item"><div class="score-number" id="modal-coins">🪙 0</div><div class="score-label">Coins</div></div>
+                </div>
+                <p id="modal-message">Great job!</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                    <button class="btn btn-primary" id="modal-action-btn" onclick="closeModal()">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Container - loads pages dynamically -->
+        <div class="page-container" id="page-container">
+            <!-- Pages loaded here -->
+        </div>
+    </div>
+
+    <!-- ============================================
+         LOAD SCRIPTS
+         ============================================ -->
+    <!-- Utility Functions First -->
+    <script src="js/utils.js"></script>
+    
+    <!-- Data Files -->
+    <script src="data/syllabus.js"></script>
+    
+    <!-- App Logic -->
+    <script src="js/app.js"></script>
+    <script src="js/navigation.js"></script>
+    
+    <!-- Page-specific scripts (loaded when needed) -->
+    <script>
+        // ============================================
+        // MAIN APP CONTROLLER
+        // ============================================
+        
+        const App = {
+            currentPage: 'dashboard',
+            container: document.getElementById('page-container'),
+            
+            // Load a page
+            loadPage: function(pageName) {
+                this.currentPage = pageName;
+                
+                // Show loading state
+                this.container.innerHTML = `
+                    <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:40px;margin-bottom:16px;">🚀</div>
+                            <div style="color:var(--text-muted);">Loading...</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Fetch the page
+                fetch(`pages/${pageName}.html`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Page not found');
+                        return response.text();
+                    })
+                    .then(html => {
+                        this.container.innerHTML = html;
+                        
+                        // Execute any scripts in the page
+                        const scripts = this.container.querySelectorAll('script');
+                        scripts.forEach(script => {
+                            const newScript = document.createElement('script');
+                            if (script.src) {
+                                newScript.src = script.src;
+                            } else {
+                                newScript.textContent = script.textContent;
+                            }
+                            document.body.appendChild(newScript);
+                        });
+                        
+                        // Initialize page
+                        if (window.initPage) {
+                            window.initPage();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading page:', error);
+                        this.container.innerHTML = `
+                            <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px;">
+                                <div style="text-align:center;">
+                                    <div style="font-size:60px;margin-bottom:16px;">😅</div>
+                                    <h3 style="color:var(--text-primary);">Page not found</h3>
+                                    <p style="color:var(--text-muted);">The page you're looking for doesn't exist.</p>
+                                    <button onclick="App.loadPage('dashboard')" class="btn btn-primary" style="margin-top:16px;">
+                                        Go Home
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+            },
+            
+            // Navigate to a page
+            navigate: function(pageName) {
+                this.loadPage(pageName);
+                // Update URL hash for bookmarking
+                window.location.hash = pageName;
+            }
+        };
+        
+        // ============================================
+        // TOAST (Global)
+        // ============================================
+        
+        let toastTimeout = null;
+        
+        window.showToast = function(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        };
+        
+        // ============================================
+        // MODAL (Global)
+        // ============================================
+        
+        window.closeModal = function() {
+            document.getElementById('modal').classList.remove('show');
+        };
+        
+        window.showModal = function(icon, title, message, actionText, actionCallback) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-action-btn').textContent = actionText || 'Continue';
+            document.getElementById('modal-action-btn').onclick = actionCallback || closeModal;
+            document.getElementById('modal').classList.add('show');
+        };
+        
+        // ============================================
+        // CONFETTI (Global)
+        // ============================================
+        
+        window.launchConfetti = function() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#6C63FF', '#FF6584', '#FFD700', '#00D2A0', '#FFB800', '#FF5A5F', '#B9F2FF', '#E5E4E2'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 8 + 4) + 'px';
+                confetti.style.height = (Math.random() * 8 + 4) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        };
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        // Handle hash-based navigation
+        window.addEventListener('hashchange', () => {
+            const page = window.location.hash.replace('#', '') || 'dashboard';
+            App.loadPage(page);
+        });
+        
+        // Start app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show splash
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                }, 800);
+                
+                // Load initial page
+                const initialPage = window.location.hash.replace('#', '') || 'dashboard';
+                App.loadPage(initialPage);
+            }, 3000);
+            
+            console.log('🌍 Grammar Galaxy - Powered by Shree Parth Academy');
+            console.log('📚 Multiple HTML file system loaded successfully!');
+        });
+    </script>
+</body>
+</html>

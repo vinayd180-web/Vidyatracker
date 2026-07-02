@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cheat Sheet - Grammar Galaxy</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+        .topic-detail-header {
+            background: linear-gradient(135deg, #1A0A2E 0%, #0A1A2E 100%);
+            margin: -16px -16px 16px -16px;
+            padding: 20px 16px 28px 16px;
+            color: white;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            border-bottom: 1px solid rgba(108,99,255,0.1);
+        }
+
+        .topic-detail-header .topic-detail-back {
+            background: none; border: none; color: rgba(255,255,255,0.6); font-size: 14px;
+            cursor: pointer; padding: 4px 0; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+            font-family: var(--font-family);
+            transition: var(--transition);
+        }
+        .topic-detail-header .topic-detail-back:hover { color: white; }
+        .topic-detail-header .topic-detail-title { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+        .topic-detail-header .topic-detail-sub { font-size: 14px; opacity: 0.7; }
+
+        .cheat-sheet {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin: 12px 0;
+            border: 1px solid rgba(108,99,255,0.05);
+        }
+
+        .cheat-sheet h3 {
+            color: var(--primary);
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cheat-sheet .rule-box {
+            background: rgba(108,99,255,0.03);
+            border-left: 3px solid var(--primary);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .cheat-sheet .rule-box .rule-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .cheat-sheet .rule-box .rule-desc {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+            white-space: pre-wrap;
+        }
+
+        .cheat-sheet .example-box {
+            background: rgba(255,215,0,0.05);
+            border: 1px solid rgba(255,215,0,0.1);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin: 8px 0;
+        }
+        .cheat-sheet .example-box .example-label {
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .cheat-sheet .example-box .example-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+            white-space: pre-wrap;
+        }
+
+        .cheat-sheet .format-box {
+            background: rgba(0,210,160,0.03);
+            border: 1px solid rgba(0,210,160,0.1);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+        .cheat-sheet .format-box .highlight { color: var(--gold); }
+        .cheat-sheet .format-box .placeholder { color: var(--primary-light); }
+    </style>
+</head>
+<body>
+    <div id="cheat-sheet-page">
+        <!-- Header -->
+        <div class="topic-detail-header">
+            <button class="topic-detail-back" onclick="goBack()">← Back to Hub</button>
+            <div class="topic-detail-title" id="topic-title">Grammar</div>
+            <div class="topic-detail-sub" id="topic-sub">Complete Guide</div>
+        </div>
+
+        <!-- Content -->
+        <div id="cheat-sheet-content"></div>
+        <div style="height:20px;"></div>
+    </div>
+
+    <script>
+        let currentTopicId = null;
+        let currentClass = 8;
+
+        function loadCheatSheet(topicId, classNum) {
+            currentTopicId = topicId;
+            currentClass = classNum;
+
+            const topicData = getTopicData(classNum, topicId);
+            if (!topicData) {
+                document.getElementById('cheat-sheet-content').innerHTML = `
+                    <div style="text-align:center;padding:40px;">
+                        <div style="font-size:60px;">😅</div>
+                        <h3>Topic not found</h3>
+                        <p style="color:var(--text-muted);">The topic you're looking for doesn't exist.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('topic-title').textContent = topicData.title;
+            document.getElementById('topic-sub').textContent = topicData.description;
+
+            const container = document.getElementById('cheat-sheet-content');
+            let html = '';
+
+            if (topicData.cheatSheet) {
+                const sections = topicData.cheatSheet.sections || [];
+                sections.forEach(section => {
+                    html += `<div class="cheat-sheet">`;
+                    html += `<h3>${section.title}</h3>`;
+
+                    if (section.rules) {
+                        section.rules.forEach(rule => {
+                            html += `
+                                <div class="rule-box">
+                                    <div class="rule-title">${rule.title}</div>
+                                    <div class="rule-desc">${rule.desc}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    if (section.examples) {
+                        section.examples.forEach(example => {
+                            html += `
+                                <div class="example-box">
+                                    <div class="example-label">${example.label}</div>
+                                    <div class="example-text">${example.text}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `</div>`;
+                });
+            }
+
+            // Practice button
+            const questions = getTopicQuestions(topicId, classNum);
+            if (questions && questions.length > 0) {
+                html += `
+                    <button class="btn btn-gold" onclick="startPractice()" style="width:100%;margin:12px 0;">
+                        🎯 Practice ${questions.length} Questions
+                    </button>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function startPractice() {
+            // Send message to parent to start quiz
+            window.parent.postMessage({
+                type: 'navigate',
+                page: 'quiz',
+                data: {
+                    topicId: currentTopicId,
+                    class: currentClass
+                }
+            }, '*');
+        }
+
+        function goBack() {
+            window.parent.postMessage({
+                type: 'navigate',
+                page: 'dashboard'
+            }, '*');
+        }
+
+        // Listen for navigation data
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'loadCheatSheet') {
+                loadCheatSheet(event.data.topicId, event.data.class);
+            }
+        });
+
+        // Initialize
+        window.initPage = function() {
+            // Check if we have data from parent
+            const urlParams = new URLSearchParams(window.location.search);
+            const topicId = urlParams.get('topic');
+            const classNum = parseInt(urlParams.get('class')) || 8;
+            if (topicId) {
+                loadCheatSheet(topicId, classNum);
+            }
+        };
+
+        // If no data, show placeholder
+        if (!currentTopicId) {
+            document.getElementById('cheat-sheet-content').innerHTML = `
+                <div style="text-align:center;padding:40px;">
+                    <div style="font-size:60px;">📚</div>
+                    <h3>Select a topic</h3>
+                    <p style="color:var(--text-muted);">Go back to the dashboard and select a topic to learn.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
