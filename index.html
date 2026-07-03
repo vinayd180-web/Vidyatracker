@@ -1,460 +1,514 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Grammar Galaxy 🌟 - Powered by Shree Parth Academy</title>
-    
-    <!-- Shared CSS -->
-    <link rel="stylesheet" href="css/style.css" />
-    
-    <!-- Page-specific CSS -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admission Form · AV Private Tuitions</title>
+    <!-- html2pdf.js for high-quality PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* App container */
-        #app {
-            width: 100%;
-            max-width: 480px;
-            min-height: 100vh;
-            background: var(--bg);
+        * {
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #1a365d;
+            --secondary: #2b6cb0;
+            --border: #cbd5e0;
+            --text: #2d3748;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #edf2f7;
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 60px rgba(108,99,255,0.05);
+            background: white;
+            padding: 30px 35px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
-
-        /* Page container - loads pages via iframe or fetch */
-        .page-container {
-            width: 100%;
-            min-height: 100vh;
-            position: relative;
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-
-        .page-container iframe {
-            width: 100%;
-            min-height: 100vh;
+        .btn {
+            padding: 8px 22px;
             border: none;
-            background: var(--bg);
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
+        .btn-pdf { background: #e53e3e; color: white; }
+        .btn-pdf:hover { background: #b91c1c; }
+        .btn-csv { background: #2b6cb0; color: white; }
+        .btn-csv:hover { background: #1a4f8b; }
+        .btn-clear { background: #718096; color: white; }
+        .btn-clear:hover { background: #4a5568; }
+        .btn-upload { background: #38a169; color: white; }
+        .btn-upload:hover { background: #2f855a; }
 
-        /* Splash screen (in main file) */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2E 50%, #0A1A2E 100%);
+        /* header */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 16px;
+            margin-bottom: 25px;
+        }
+        .header h1 { margin: 0; color: var(--primary); font-size: 28px; letter-spacing: 1px; }
+        .header h3 { margin: 5px 0 10px 0; color: var(--secondary); font-weight: 600; }
+        .header p { margin: 3px 0; font-size: 14px; }
+
+        .section-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .fields-column { flex: 3; min-width: 260px; }
+        .photo-column { flex: 1; min-width: 150px; display: flex; justify-content: flex-end; }
+
+        .photo-upload-box {
+            width: 150px;
+            height: 180px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            background: #f7fafc;
+            overflow: hidden;
+            position: relative;
+            transition: 0.2s;
         }
-        #splash-screen.hidden { opacity: 0; transform: scale(1.1); pointer-events: none; }
-
-        #splash-screen::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(2px 2px at 50px 160px, #ddd, transparent),
-                radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
-                radial-gradient(2px 2px at 130px 80px, #fff, transparent),
-                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.7), transparent);
-            background-size: 200px 200px;
-            animation: twinkle 4s ease-in-out infinite alternate;
+        .photo-upload-box:hover { border-color: var(--secondary); background: #edf2f7; }
+        .photo-upload-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
         }
-        @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+        .photo-upload-box span { font-size: 13px; color: #4a5568; padding: 8px; }
+        .photo-upload-box input[type="file"] { display: none; }
 
-        .splash-content { text-align: center; animation: float 3s ease-in-out infinite; z-index: 1; position: relative; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-        .splash-logo {
-            width: 140px; height: 140px;
-            background: radial-gradient(circle at 30% 30%, rgba(108,99,255,0.3), rgba(108,99,255,0.1));
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-xl);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 64px; margin: 0 auto 32px;
-            border: 2px solid rgba(108,99,255,0.3);
-            box-shadow: var(--glow-primary);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-        .splash-title { color: white; font-size: 40px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; text-shadow: 0 0 40px rgba(108,99,255,0.3); }
-        .splash-title .globe { display: inline-block; animation: spin 4s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .splash-title .star { color: var(--gold); }
-
-        .splash-subtitle { color: rgba(255,255,255,0.8); font-size: 18px; font-weight: 300; }
-        .splash-powered { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 4px; font-weight: 300; }
-        .splash-powered strong { color: rgba(255,255,255,0.8); font-weight: 600; }
-
-        .splash-badge {
-            display: inline-block;
-            background: rgba(255,215,0,0.15);
-            backdrop-filter: blur(10px);
-            padding: 6px 24px;
-            border-radius: var(--radius-full);
-            color: var(--gold);
-            font-size: 13px;
-            font-weight: 600;
+        h2.section-title {
+            font-size: 18px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+            margin-top: 28px;
+            margin-bottom: 18px;
             text-transform: uppercase;
-            margin-top: 12px;
-            letter-spacing: 1px;
-            border: 1px solid rgba(255,215,0,0.2);
+            letter-spacing: 0.5px;
         }
 
-        .splash-loader {
-            margin-top: 48px;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px 22px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: span 2; }
+        label { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #2d3748; }
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        input:focus, select:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(43,108,176,0.15); outline: none; }
+
+        .radio-group {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .terms-box {
+            background: #f7fafc;
+            border-left: 4px solid var(--secondary);
+            padding: 14px 20px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            border-radius: 4px;
+        }
+        .terms-box ol { margin: 0; padding-left: 22px; }
+
+        /* signature block */
+        .signature-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+            margin-top: 20px;
+            align-items: flex-end;
+        }
+        .signature-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .canvas-wrapper {
+            border: 2px solid var(--text);
+            border-radius: 8px;
+            background: white;
+            width: 100%;
+            max-width: 360px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+            border-radius: 6px;
+        }
+        .sig-toolbar {
             display: flex;
             gap: 12px;
-            justify-content: center;
-            z-index: 1;
-            position: relative;
+            flex-wrap: wrap;
+            margin-top: 4px;
         }
-        .splash-loader span {
-            display: inline-block;
-            width: 12px; height: 12px;
-            background: rgba(108,99,255,0.4);
-            border-radius: 50%;
-            animation: bounce 1.4s ease-in-out infinite;
-            border: 1px solid rgba(108,99,255,0.3);
+        .sig-toolbar button {
+            background: none;
+            border: none;
+            font-size: 13px;
+            color: #2b6cb0;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 0;
+            border-bottom: 1px solid transparent;
         }
-        .splash-loader span:nth-child(2) { animation-delay: 0.2s; background: rgba(108,99,255,0.6); }
-        .splash-loader span:nth-child(3) { animation-delay: 0.4s; background: rgba(108,99,255,0.8); }
-        @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+        .sig-toolbar button:hover { border-bottom-color: #2b6cb0; }
+        .sig-toolbar .danger { color: #e53e3e; }
+        .sig-toolbar .danger:hover { border-bottom-color: #e53e3e; }
 
-        .splash-footer { position: absolute; bottom: 40px; color: rgba(255,255,255,0.2); font-size: 12px; z-index: 1; }
-
-        /* Toast notification (global) */
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--bg-card);
-            color: var(--text-primary);
-            padding: 12px 24px;
-            border-radius: var(--radius-full);
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: var(--shadow-md);
-            z-index: 400;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-            max-width: 90%;
-            text-align: center;
-            border: 1px solid rgba(108,99,255,0.1);
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 20px; }
+            .controls, .sig-toolbar, .photo-upload-box span { display: none !important; }
+            .photo-upload-box { border-style: solid; }
         }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.success { border-color: var(--success); color: var(--success); }
-        .toast.error { border-color: var(--danger); color: var(--danger); }
-        .toast.info { border-color: var(--primary); color: var(--primary); }
-        .toast.gold { border-color: var(--gold); color: var(--gold); }
-
-        /* Modal (global) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(12px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-            padding: 24px;
-            animation: fadeIn 0.3s ease;
-        }
-        .modal-overlay.show { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            padding: 32px 24px 24px 24px;
-            max-width: 380px;
-            width: 100%;
-            text-align: center;
-            animation: modalSlideUp 0.4s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(108,99,255,0.1);
-        }
-        @keyframes modalSlideUp {
-            from { opacity: 0; transform: scale(0.9) translateY(30px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal .modal-icon { font-size: 56px; margin-bottom: 12px; display: block; }
-        .modal h3 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: var(--text-primary); }
-        .modal p { color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6; font-size: 15px; }
-        .modal .modal-actions { display: flex; gap: 12px; }
-        .modal .modal-actions .btn { flex: 1; }
-
-        .modal .modal-score {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin: 12px 0 16px 0;
-        }
-        .modal .modal-score .score-item { text-align: center; }
-        .modal .modal-score .score-item .score-number {
-            font-size: 28px; font-weight: 700; color: var(--gold);
-        }
-        .modal .modal-score .score-item .score-label {
-            font-size: 11px; color: var(--text-muted);
-        }
-
-        /* Confetti container */
-        .confetti-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 500;
-            overflow: hidden;
-        }
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            animation: confettiFall 3s ease-in-out forwards;
-        }
-        @keyframes confettiFall {
-            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
-        /* Responsive */
-        @media (max-width: 430px) {
-            .splash-title { font-size: 32px; }
-            .splash-logo { width: 110px; height: 110px; font-size: 50px; }
+        @media (max-width: 680px) {
+            .signature-container { grid-template-columns: 1fr; }
+            .photo-column { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <div id="app">
-        <!-- Splash Screen -->
-        <div id="splash-screen">
-            <div class="splash-content">
-                <div class="splash-logo">🌍</div>
-                <h1 class="splash-title">Grammar <span class="globe">🌍</span> Galaxy <span class="star">⭐</span></h1>
-                <p class="splash-subtitle">Complete English Grammar Learning</p>
-                <p class="splash-powered">Powered by <strong>Shree Parth Academy</strong></p>
-                <span class="splash-badge">🎯 Maharashtra Board 8th-10th</span>
-                <div class="splash-loader"><span></span><span></span><span></span></div>
-            </div>
-            <div class="splash-footer">📚 Learn • Practice • Master</div>
-        </div>
+<div class="controls">
+    <button class="btn btn-clear" onclick="resetForm()">🗑️ Clear</button>
+    <button class="btn btn-csv" onclick="exportCSV()">📊 CSV</button>
+    <button class="btn btn-pdf" onclick="exportPDF()">📄 PDF</button>
+</div>
 
-        <!-- Toast -->
-        <div class="toast" id="toast"></div>
-
-        <!-- Confetti -->
-        <div class="confetti-container" id="confetti-container"></div>
-
-        <!-- Modal -->
-        <div class="modal-overlay" id="modal">
-            <div class="modal">
-                <span class="modal-icon" id="modal-icon">🎉</span>
-                <h3 id="modal-title">Quiz Complete!</h3>
-                <div class="modal-score">
-                    <div class="score-item"><div class="score-number" id="modal-score-number">0</div><div class="score-label">Score</div></div>
-                    <div class="score-item"><div class="score-number" id="modal-accuracy">0%</div><div class="score-label">Accuracy</div></div>
-                    <div class="score-item"><div class="score-number" id="modal-coins">🪙 0</div><div class="score-label">Coins</div></div>
-                </div>
-                <p id="modal-message">Great job!</p>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-                    <button class="btn btn-primary" id="modal-action-btn" onclick="closeModal()">Continue</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page Container - loads pages dynamically -->
-        <div class="page-container" id="page-container">
-            <!-- Pages loaded here -->
-        </div>
+<div class="container" id="admission-form">
+    <!-- Header -->
+    <div class="header">
+        <h1>ADMISSION FORM</h1>
+        <h3>AV Private Tuitions</h3>
+        <p>📞 7977106449 / 7977109493</p>
+        <p>📍 105/H-wing, Opp. Aryan One, Shirgaon, Badlapur (E) - 421503</p>
     </div>
 
-    <!-- ============================================
-         LOAD SCRIPTS
-         ============================================ -->
-    <!-- Utility Functions First -->
-    <script src="js/utils.js"></script>
-    
-    <!-- Data Files -->
-    <script src="data/syllabus.js"></script>
-    
-    <!-- App Logic -->
-    <script src="js/app.js"></script>
-    <script src="js/navigation.js"></script>
-    
-    <!-- Page-specific scripts (loaded when needed) -->
-    <script>
-        // ============================================
-        // MAIN APP CONTROLLER
-        // ============================================
-        
-        const App = {
-            currentPage: 'dashboard',
-            container: document.getElementById('page-container'),
-            
-            // Load a page
-            loadPage: function(pageName) {
-                this.currentPage = pageName;
-                
-                // Show loading state
-                this.container.innerHTML = `
-                    <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px;">
-                        <div style="text-align:center;">
-                            <div style="font-size:40px;margin-bottom:16px;">🚀</div>
-                            <div style="color:var(--text-muted);">Loading...</div>
+    <form id="mainForm">
+        <!-- Student + Photo -->
+        <div class="section-row">
+            <div class="fields-column">
+                <h2 class="section-title" style="margin-top:0;">1. Student Details</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="fullName">Full Name of Student</label>
+                        <input type="text" id="fullName" placeholder="First Middle Last">
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="gender" value="Male"> Male</label>
+                            <label class="radio-label"><input type="radio" name="gender" value="Female"> Female</label>
                         </div>
                     </div>
-                `;
-                
-                // Fetch the page
-                fetch(`pages/${pageName}.html`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Page not found');
-                        return response.text();
-                    })
-                    .then(html => {
-                        this.container.innerHTML = html;
-                        
-                        // Execute any scripts in the page
-                        const scripts = this.container.querySelectorAll('script');
-                        scripts.forEach(script => {
-                            const newScript = document.createElement('script');
-                            if (script.src) {
-                                newScript.src = script.src;
-                            } else {
-                                newScript.textContent = script.textContent;
-                            }
-                            document.body.appendChild(newScript);
-                        });
-                        
-                        // Initialize page
-                        if (window.initPage) {
-                            window.initPage();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading page:', error);
-                        this.container.innerHTML = `
-                            <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px;">
-                                <div style="text-align:center;">
-                                    <div style="font-size:60px;margin-bottom:16px;">😅</div>
-                                    <h3 style="color:var(--text-primary);">Page not found</h3>
-                                    <p style="color:var(--text-muted);">The page you're looking for doesn't exist.</p>
-                                    <button onclick="App.loadPage('dashboard')" class="btn btn-primary" style="margin-top:16px;">
-                                        Go Home
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-            },
-            
-            // Navigate to a page
-            navigate: function(pageName) {
-                this.loadPage(pageName);
-                // Update URL hash for bookmarking
-                window.location.hash = pageName;
-            }
+                </div>
+            </div>
+            <div class="photo-column">
+                <div class="photo-upload-box" onclick="document.getElementById('photoInput').click()">
+                    <span id="uploadText">📸 Upload Photo</span>
+                    <img id="photoPreview" src="" alt="Student">
+                    <input type="file" id="photoInput" accept="image/*" onchange="previewImage(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- More student fields -->
+        <div class="form-grid" style="margin-top:-8px;">
+            <div class="form-group">
+                <label for="school">School / College</label>
+                <input type="text" id="school">
+            </div>
+            <div class="form-group">
+                <label for="standard">Current Standard</label>
+                <input type="text" id="standard" placeholder="e.g. 8th, 10th">
+            </div>
+            <div class="form-group">
+                <label>Board</label>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="board" value="CBSE"> CBSE</label>
+                    <label class="radio-label"><input type="radio" name="board" value="State Board"> State</label>
+                    <label class="radio-label"><input type="radio" name="board" value="Other"> Other</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="subjects">Subjects Required</label>
+                <input type="text" id="subjects" placeholder="Maths, Science...">
+            </div>
+        </div>
+
+        <!-- Parent -->
+        <h2 class="section-title">2. Parent / Guardian</h2>
+        <div class="form-grid">
+            <div class="form-group"><label for="parentName">Parent Name</label><input type="text" id="parentName"></div>
+            <div class="form-group"><label for="relation">Relationship</label><input type="text" id="relation"></div>
+            <div class="form-group"><label for="primaryContact">Primary Contact</label><input type="tel" id="primaryContact"></div>
+            <div class="form-group"><label for="altContact">Alternate Contact</label><input type="tel" id="altContact"></div>
+            <div class="form-group full-width"><label for="email">Email</label><input type="email" id="email"></div>
+            <div class="form-group full-width"><label for="address">Address</label><input type="text" id="address"></div>
+            <div class="form-group"><label for="pincode">Pin Code</label><input type="text" id="pincode" value="421503"></div>
+        </div>
+
+        <!-- Terms -->
+        <h2 class="section-title">3. Terms & Conditions</h2>
+        <div class="terms-box">
+            <ol>
+                <li><strong>Attendance:</strong> Regular attendance is mandatory. Parents must inform in advance if absent.</li>
+                <li><strong>Fee Policy:</strong> Fees paid by due date. Non-refundable.</li>
+                <li><strong>Discipline:</strong> Misbehavior or incomplete homework may lead to cancellation.</li>
+            </ol>
+            <p style="margin-top:8px;font-weight:600;">Declaration: I declare all information true and agree to abide by the rules of AV Private Tuitions.</p>
+        </div>
+
+        <!-- Signature + Date -->
+        <div class="signature-container">
+            <div class="form-group">
+                <label for="formDate">Date</label>
+                <input type="date" id="formDate">
+            </div>
+            <div class="signature-area">
+                <label>Parent / Guardian Digital Signature</label>
+                <div class="canvas-wrapper">
+                    <canvas id="signaturePad" width="400" height="140"></canvas>
+                </div>
+                <div class="sig-toolbar">
+                    <button onclick="clearSignature()">✖ Clear</button>
+                    <button onclick="uploadSignature()" class="btn-upload" style="background:#38a169;color:white;padding:2px 16px;border-radius:20px;font-size:12px;">📤 Upload</button>
+                    <input type="file" id="sigUploadInput" accept="image/*" style="display:none" onchange="loadSignatureImage(event)">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // ---- set default date ----
+    document.getElementById('formDate').valueAsDate = new Date();
+
+    // ---- photo preview ----
+    function previewImage(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = document.getElementById('photoPreview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+            document.getElementById('uploadText').style.display = 'none';
         };
-        
-        // ============================================
-        // TOAST (Global)
-        // ============================================
-        
-        let toastTimeout = null;
-        
-        window.showToast = function(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.classList.add('show');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+        reader.readAsDataURL(file);
+    }
+
+    // ---- signature canvas ----
+    const canvas = document.getElementById('signaturePad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        // keep aspect ratio but we fix width via css, canvas internal resolution fixed.
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
         };
-        
-        // ============================================
-        // MODAL (Global)
-        // ============================================
-        
-        window.closeModal = function() {
-            document.getElementById('modal').classList.remove('show');
+    }
+
+    function startDraw(e) {
+        e.preventDefault();
+        isDrawing = true;
+        const pos = getPos(e);
+        lastX = pos.x; lastY = pos.y;
+    }
+
+    function draw(e) {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#1a365d';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        lastX = pos.x; lastY = pos.y;
+    }
+
+    function stopDraw(e) {
+        e.preventDefault();
+        isDrawing = false;
+    }
+
+    // mouse events
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
+    // touch events
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDraw, { passive: false });
+
+    // clear signature
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // ---- upload signature image (stylus/photo) ----
+    function uploadSignature() {
+        document.getElementById('sigUploadInput').click();
+    }
+
+    function loadSignatureImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = ev.target.result;
         };
-        
-        window.showModal = function(icon, title, message, actionText, actionCallback) {
-            document.getElementById('modal-icon').textContent = icon;
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            document.getElementById('modal-action-btn').textContent = actionText || 'Continue';
-            document.getElementById('modal-action-btn').onclick = actionCallback || closeModal;
-            document.getElementById('modal').classList.add('show');
+        reader.readAsDataURL(file);
+        event.target.value = ''; // reset input
+    }
+
+    // ---- reset form ----
+    function resetForm() {
+        document.getElementById('mainForm').reset();
+        document.getElementById('photoPreview').style.display = 'none';
+        document.getElementById('uploadText').style.display = 'block';
+        clearSignature();
+        document.getElementById('formDate').valueAsDate = new Date();
+        // clear radio
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    }
+
+    // ---- collect form data as object ----
+    function getFormData() {
+        const getVal = id => document.getElementById(id)?.value || '';
+        const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+
+        return {
+            fullName: getVal('fullName'),
+            dob: getVal('dob'),
+            gender: getRadio('gender'),
+            school: getVal('school'),
+            standard: getVal('standard'),
+            board: getRadio('board'),
+            subjects: getVal('subjects'),
+            parentName: getVal('parentName'),
+            relation: getVal('relation'),
+            primaryContact: getVal('primaryContact'),
+            altContact: getVal('altContact'),
+            email: getVal('email'),
+            address: getVal('address'),
+            pincode: getVal('pincode'),
+            date: getVal('formDate')
         };
-        
-        // ============================================
-        // CONFETTI (Global)
-        // ============================================
-        
-        window.launchConfetti = function() {
-            const container = document.getElementById('confetti-container');
-            const colors = ['#6C63FF', '#FF6584', '#FFD700', '#00D2A0', '#FFB800', '#FF5A5F', '#B9F2FF', '#E5E4E2'];
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.width = (Math.random() * 8 + 4) + 'px';
-                confetti.style.height = (Math.random() * 8 + 4) + 'px';
-                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
-                container.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
-            }
+    }
+
+    // ---- CSV export ----
+    function exportCSV() {
+        const data = getFormData();
+        const headers = Object.keys(data);
+        const values = Object.values(data).map(v => `"${v}"`);
+        const csvContent = headers.join(',') + '\n' + values.join(',');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'admission_data.csv';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ---- PDF export (full form) ----
+    function exportPDF() {
+        const element = document.getElementById('admission-form');
+        const opt = {
+            margin:        [0.6, 0.6, 0.6, 0.6],
+            filename:     'Admission_Form_AV.pdf',
+            image:        { type: 'jpeg', quality: 0.95 },
+            html2canvas:  { scale: 2, letterRendering: true, useCORS: true, logging: false },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
-        
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        
-        // Handle hash-based navigation
-        window.addEventListener('hashchange', () => {
-            const page = window.location.hash.replace('#', '') || 'dashboard';
-            App.loadPage(page);
-        });
-        
-        // Start app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show splash
-            setTimeout(() => {
-                document.getElementById('splash-screen').classList.add('hidden');
-                setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                }, 800);
-                
-                // Load initial page
-                const initialPage = window.location.hash.replace('#', '') || 'dashboard';
-                App.loadPage(initialPage);
-            }, 3000);
-            
-            console.log('🌍 Grammar Galaxy - Powered by Shree Parth Academy');
-            console.log('📚 Multiple HTML file system loaded successfully!');
-        });
-    </script>
+        // ensure canvas content is captured
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // (optional) fix canvas scaling on load
+    window.addEventListener('load', () => {
+        // ensure canvas is clean
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a365d';
+        ctx.lineWidth = 2.5;
+    });
+</script>
 </body>
 </html>
